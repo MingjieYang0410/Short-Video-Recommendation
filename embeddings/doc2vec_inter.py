@@ -18,7 +18,7 @@ data = pd.concat([data, test], axis=0).reset_index(drop=True)
 data = data.merge(feed_info[["feedid","authorid"]], how='left',on="feedid")
 
 
-def DotaDoc2vec(df, main_col, gp_col, dim_n):
+def doc_to_vec(df, main_col, gp_col, dim_n):
     print(main_col, gp_col)
     df[gp_col] = df[gp_col].astype(str)
     tmp = df.groupby(main_col)[gp_col].agg(list).reset_index()
@@ -39,6 +39,7 @@ def DotaDoc2vec(df, main_col, gp_col, dim_n):
     del tmp, df_w2v, df_feat, documents, vectors
     gc.collect()
 
-dim_n = 100 # 150
+
+dim_n = 150
 for main_col, gp_col in [('userid', 'feedid'), ('userid', 'authorid'), ('feedid', 'userid'), ('authorid', 'userid')]:
-    DotaDoc2vec(data,main_col,gp_col,dim_n)
+    doc_to_vec(data,main_col,gp_col,dim_n)
