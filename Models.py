@@ -1,14 +1,4 @@
-import tensorflow as tf
-from tensorflow.keras import initializers, regularizers, constraints
-from tensorflow.keras import layers, Model
-from tensorflow.keras.models import *
-from tensorflow.keras.optimizers import *
-from tensorflow.keras.callbacks import *
-from tensorflow.keras.utils import to_categorical, Sequence
-from tensorflow.keras.backend import expand_dims, repeat_elements, sum
-from tensorflow.keras.layers import *
-import tensorflow.keras.backend as K
-from Layers import *
+from layers import *
 
 
 class MMoE(Model):
@@ -27,7 +17,6 @@ class MMoE(Model):
             **kwargs
     ):
         super(MMoE, self).__init__(**kwargs)
-        # Embedding Layer
 
         self.num_tasks = num_tasks
         self.embedding_layer = EmbeddingLayer(
@@ -41,7 +30,6 @@ class MMoE(Model):
             author_user_d2v, first_order_shifts,
         )
 
-        # Class MultiTaskLayer
         self.MTLayer = MultiTask(
             num_shared_experts=num_shared_experts, num_tasks=num_tasks, experts_shape=experts_shape
         )

@@ -1,9 +1,11 @@
 from sklearn.model_selection import KFold
 from utils import *
-from Models import *
-import warnings, os, gc
+from models import *
+import warnings
+import os
+import pandas as pd
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-import  random
+import random
 warnings.filterwarnings('ignore')
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -17,6 +19,7 @@ def setup_seed(seed):
 
 
 setup_seed(16)
+
 data_path = "./data/original/"
 features_path = "./data/features/"
 models_path = "./data/models/"
@@ -113,8 +116,8 @@ data_set = user_action[["userid","feedid"]+label_cols].drop_duplicates(subset=["
 data_set = data_set.merge(feed_info[["feedid","authorid","videoplayseconds"]], how='left',on="feedid")
 
 # 设立新的标签 这个是创新点之一
-data_set["play"] = data_set["play"]/1000
-data_set["play"] = data_set["play"]/data_set["videoplayseconds"]
+data_set["play"] = data_set["play"] / 1000
+data_set["play"] = data_set["play"] / data_set["videoplayseconds"]
 data_set["play"] = data_set["play"].apply(lambda x:1 if x>0.9 else 0)
 data_set = data_set.astype(int)
 

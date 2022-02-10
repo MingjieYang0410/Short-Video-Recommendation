@@ -4,8 +4,8 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
-data_path = "./data/original/"
-features_path = "./data/features/"
+data_path = "../data/original/"
+features_path = "../data/features/"
 
 feed_info = pd.read_csv(data_path+'feed_info.csv')
 user_action = pd.read_csv(data_path+'user_action.csv')

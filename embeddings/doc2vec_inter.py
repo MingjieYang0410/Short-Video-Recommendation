@@ -4,8 +4,8 @@ from tqdm import tqdm
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 import warnings,os,gc
 
-data_path = "./data/original/"
-features_path = "./data/features/"
+data_path = "../data/original/"
+features_path = "../data/features/"
 
 feed_info = pd.read_csv(data_path+'feed_info.csv')
 user_action = pd.read_csv(data_path+'user_action.csv')

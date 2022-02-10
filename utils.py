@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from collections import defaultdict
-import pandas as pd
+
 
 def get_gaucs(data_feats, data_labels, valid_fold, model):
     n = len(valid_fold)
