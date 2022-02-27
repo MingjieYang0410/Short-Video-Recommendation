@@ -1,4 +1,12 @@
 # Short-Video-Recommendation
+
+This project aims at optimizing seven tasks for short video 
+recommendation. 
+
+Tasks: Read Comment, Like, Click Avatar, Forward, Favorite, Comment, Follow
+
+Keywords: MMOE, PLE, DeepWalk, TF-IDF + Truncated SVD, Doc2Vec
+
 ### I. Guidance
 **Step 1**: Build required repository by running:
 ```bash
@@ -24,7 +32,6 @@ sh ./scr/pre_training.sh
 python main.py
 ```
 
-
 ### II. Environment
 Python 3.7
 
@@ -35,3 +42,11 @@ Gensim 3.8.3 (Note: The latest version raises errors)
 Scikit-learn 1.0.1
 
 Pandas 1.3.5
+
+### III. References
+Modeling Task Relationships in Multi-task Learning with
+Multi-gate Mixture-of-Experts https://dl.acm.org/doi/pdf/10.1145/3219819.3220007
+
+Progressive Layered Extraction (PLE): A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations https://dl.acm.org/doi/10.1145/3383313.3412236
+
+DeepFM: A Factorization-Machine based Neural Network for CTR Prediction https://www.ijcai.org/Proceedings/2017/0239.pdf

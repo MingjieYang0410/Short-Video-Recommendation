@@ -43,7 +43,6 @@ df_svd = pd.DataFrame(tfidf_svd, columns=["user_key1"+'_svd'+str(i) for i in ran
 df_feat = pd.concat([user_key1[["userid"]], df_svd], axis=1)
 df_feat.to_pickle(features_path+"user_key1_vec_{dim}.pickle".format(dim=str(dim_n)))
 
-## 将一个用户观看过的所有视频的描述向量拼接起来全部一起去描述这个用户！machine_keyword_list
 data["key2"] = data["key2"].astype(str)
 user_key2 = data.groupby("userid")["key2"].agg(list).reset_index()
 user_key2["key2"] = user_key2["key2"].apply(lambda x: " ".join(x))
@@ -62,7 +61,6 @@ df_svd = pd.DataFrame(tfidf_svd, columns=["user_key2"+'_svd'+str(i) for i in ran
 df_feat = pd.concat([user_key2[["userid"]], df_svd], axis=1)
 df_feat.to_pickle(features_path+"user_key2_vec_{dim}.pickle".format(dim=str(dim_n)))
 
-## 将一个作者发表过的所有视频的描述向量拼接起来全部一起去描述这个作者！manual_keyword_list
 data["key1"] = data["key1"].astype(str)
 tmp = data.groupby("authorid")["key1"].agg(list).reset_index()
 tmp["key1"] = tmp["key1"].apply(lambda x: " ".join(x))
@@ -88,7 +86,6 @@ df_svd = pd.DataFrame(tfidf_svd, columns=["author_key1"+'_svd'+str(i) for i in r
 df_feat = pd.concat([author_key1[["authorid"]], df_svd], axis=1)
 df_feat.to_pickle(features_path+"author_key1_vec_{dim}.pickle".format(dim=str(dim_n)))
 
-## 将一个作者发表过的所有视频的描述向量拼接起来全部一起去描述这个作者！machine_keyword_list
 data["key2"] = data["key2"].astype(str)
 tmp = data.groupby("authorid")["key2"].agg(list).reset_index()
 tmp["key2"] = tmp["key2"].apply(lambda x: " ".join(x))
@@ -114,7 +111,6 @@ df_svd = pd.DataFrame(tfidf_svd, columns=["author_key2"+'_svd'+str(i) for i in r
 df_feat = pd.concat([author_key2[["authorid"]], df_svd], axis=1)
 df_feat.to_pickle(features_path+"author_key2_vec_{dim}.pickle".format(dim=str(dim_n)))
 
-## 这里是将重复出现的视频的key1聚合在一起，相当于复制了几份一起表示这个视频，有点奇怪。。。manual_keyword_list
 data["key1"] = data["key1"].astype(str)
 tmp = data.groupby("feedid")["key1"].agg(list).reset_index()
 tmp["key1"] = tmp["key1"].apply(lambda x: " ".join(x))
@@ -144,7 +140,6 @@ df_feat = pd.concat([feed_key1[["feedid"]], df_svd], axis=1)
 
 df_feat.to_pickle(features_path+"feed_key1_vec_{dim}.pickle".format(dim=str(dim_n)))
 
-## 这里是将重复出现的视频的key1聚合在一起，相当于复制了几份一起表示这个视频，有点奇怪。。。machine_keyword_list
 data["key2"] = data["key2"].astype(str)
 tmp = data.groupby("feedid")["key2"].agg(list).reset_index()
 tmp["key2"] = tmp["key2"].apply(lambda x: " ".join(x))

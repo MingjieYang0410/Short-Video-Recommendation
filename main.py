@@ -31,16 +31,15 @@ user_action = pd.read_csv(data_path+'user_action.csv')
 feed_emb = pd.read_csv(data_path+'feed_embeddings.csv')
 
 
-# 建立 id 2 index 映射字典
 def id_encode(series):
     unique = list(series.unique())
     unique.sort()
-    return dict(zip(unique, range(series.nunique()))) #, dict(zip(range(series.nunique()), unique))
+    return dict(zip(unique, range(series.nunique())))
 
 
 if not os.path.exists(features_path+"userid2index.npy"):
-    userid2index = id_encode(user_action.userid) # 所有 user_id 都有唯一对应的 index
-    feedid2index = id_encode(feed_info.feedid) # 所有 feed_id 都有唯一对应的 index
+    userid2index = id_encode(user_action.userid)
+    feedid2index = id_encode(feed_info.feedid)
     authorid2index = id_encode(feed_info.authorid)
     np.save(features_path+"userid2index.npy",userid2index)
     np.save(features_path+"feedid2index.npy",feedid2index)
@@ -84,7 +83,7 @@ def embedding_mat(feat_name, dim_n, emb_mode):
     return embed_matrix
 
 
-# 建立 index to embedding 字典
+# build vocabulary
 dim_n = 150
 emb_m = "vec"
 tfidf_svd_user_feed = embedding_mat("user_feed",dim_n,emb_m)
@@ -103,6 +102,7 @@ tfidf_svd_mkey_user = embedding_mat("user_key2",dim_n,emb_m)
 tfidf_svd_hkey_feed = embedding_mat("feed_key1",dim_n,emb_m)
 tfidf_svd_mkey_feed = embedding_mat("feed_key2",dim_n,emb_m)
 
+
 tfidf_svd_feed_emb = embedding_mat("feed_emb",512,emb_m)
 
 dim_n = 150
@@ -115,7 +115,6 @@ author_user_d2v = embedding_mat("author_user",dim_n,emb_m)
 data_set = user_action[["userid","feedid"]+label_cols].drop_duplicates(subset=["userid","feedid"],keep="last").reset_index(drop=True)
 data_set = data_set.merge(feed_info[["feedid","authorid","videoplayseconds"]], how='left',on="feedid")
 
-# 设立新的标签 这个是创新点之一
 data_set["play"] = data_set["play"] / 1000
 data_set["play"] = data_set["play"] / data_set["videoplayseconds"]
 data_set["play"] = data_set["play"].apply(lambda x:1 if x>0.9 else 0)
@@ -144,8 +143,8 @@ def pad_seq(df, feat_name, max_len=1, mode='data'):
     else:
         print("Feat Name Error!!!")
 
-    tmp[feat_name] = tmp[feat_name].apply(lambda x:id2index[x]) # 将这一列的id改为index
-    seq = pad_sequences(tmp.values, maxlen = max_len) # 填空值吗？结论：不可能有空值
+    tmp[feat_name] = tmp[feat_name].apply(lambda x:id2index[x])
+    seq = pad_sequences(tmp.values, maxlen = max_len)
 
     return seq
 
@@ -167,13 +166,12 @@ for length in feature_length_list:
     feature_length += length
 
 
-name = "dota_m1v128k10"
+name = "PLE"
 if not os.path.exists(models_path + name):
     os.mkdir(models_path + name)
-phase_feat = "semi"
 epochs_ = 1
 k_folds = 10
-lr_rate = 1e-3
+lr_rate = 0.001#1e-3
 batch_size = 2048
 
 
@@ -187,11 +185,14 @@ batch_size = 2048
 # 4 [64, 64, 64, 64]  0.7328428571428571 缩放点积
 # 8 [64, 64, 64]   0.7341857142857143 缩放点积
 # 7 [64, 64, 64]    缩放点积 0.7318142857142858
-# 6 [64, 64, 64]   0.7353285714285713 缩放点积 winner
+# 6 [64, 64, 64]   0.7353285714285713 缩放点积
+# 16 shared [32, 64, 64] task [64,64, 64] 0.7362571428571429 缩放点积 winner
 # 缩放点积稳定0.005的提升
-num_shared_experts = 6
+
+num_shared_experts = 16
 num_tasks = 8
-experts_shape = [64, 64, 64]
+experts_shape = [12, 64, 64]
+task_shape = [64, 64, 64]
 
 kf = KFold(n_splits=k_folds, shuffle=True, random_state=410).split(data_feats)
 for i, (train_fold, valid_fold) in enumerate(kf):
@@ -201,11 +202,11 @@ for i, (train_fold, valid_fold) in enumerate(kf):
     train_labels = data_labels[train_fold]
     print(train_feats.shape)
     # =========================================== fit =================================================
-    the_path = models_path + "{name}/{flag}_k{n}".format(name=name, flag=phase_feat, n=str(i))
+    the_path = models_path + "{name}_k{n}".format(name=name, n=str(i))
     if not os.path.exists(the_path):
         os.mkdir(the_path)
 
-    model = MMoE(
+    model = CGC(
         tfidf_svd_user_feed, tfidf_svd_feed_user, tfidf_svd_user_author,
         tfidf_svd_author_user, tfidf_svd_feed_emb, tfidf_svd_tag_user,
         tfidf_svd_hkey_user, tfidf_svd_mkey_user, tfidf_svd_tag_feed,
@@ -213,7 +214,8 @@ for i, (train_fold, valid_fold) in enumerate(kf):
         feed_user_d2v, user_author_d2v, author_user_d2v, first_order_shifts,
         feature_length,
 
-        num_shared_experts=num_shared_experts, num_tasks=num_tasks, experts_shape=experts_shape
+        num_shared_experts=num_shared_experts, num_tasks=num_tasks,
+        experts_shape=experts_shape, task_shape=task_shape
     )
     checkpoint = ModelCheckpoint(the_path + '/model.h5', monitor='loss', verbose=1, save_best_only=True, mode='min',
                                  save_weights_only=True)

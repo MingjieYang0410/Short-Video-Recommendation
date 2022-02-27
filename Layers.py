@@ -180,7 +180,6 @@ class EmbeddingLayer(tf.keras.Model):
         user_x_user = self.Dropout2(self.Dense256(user_x_user))
 
         # Concatenate input for FM
-
         fm_feature_list = [user_feed_embed, user_author_embed, feed_user_embed,
                            author_user_embed,
                            ]
@@ -201,7 +200,7 @@ class EmbeddingLayer(tf.keras.Model):
 
 
 class MultiTask(tf.keras.Model):
-    def __init__(self, num_shared_experts, num_tasks, experts_shape=[128],
+    def __init__(self, num_shared_experts, num_tasks, experts_shape=[128], task_shape=None,
                  use_expert_bias=True, use_gate_bias=True, expert_activation='relu', gate_activation=None,
                  expert_bias_initializer='zeros', gate_bias_initializer='zeros', expert_bias_regularizer=None,
                  gate_bias_regularizer=None, expert_bias_constraint=None, gate_bias_constraint=None,
@@ -210,6 +209,7 @@ class MultiTask(tf.keras.Model):
                  gate_kernel_constraint=None, activity_regularizer=None, **kwargs):
         super(MultiTask, self).__init__(**kwargs)
         self.experts_shape = experts_shape
+        self.task_shape = task_shape
         self.num_shared_experts = num_shared_experts
         self.num_tasks = num_tasks
         self.expert_kernels = None
@@ -241,7 +241,7 @@ class MultiTask(tf.keras.Model):
             self.shared_experts.append( # can use other models as experts
                 [
                     layers.Dense(unit,
-                                 activation=PReLU(), #self.expert_activation
+                                 activation=self.expert_activation,
                                  use_bias=self.use_expert_bias,
                                  kernel_initializer=self.expert_kernel_initializer,
                                  bias_initializer=self.expert_bias_initializer,
@@ -277,7 +277,7 @@ class MultiTask(tf.keras.Model):
                                  activity_regularizer=None,
                                  kernel_constraint=self.expert_kernel_constraint,
                                  bias_constraint=self.expert_bias_constraint)
-                    for unit in self.experts_shape
+                    for unit in self.task_shape
                 ]
             )
 

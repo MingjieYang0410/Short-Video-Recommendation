@@ -1,7 +1,7 @@
 from layers import *
 
 
-class MMoE(Model):
+class CGC(Model):
     def __init__(
             self,
             tfidf_svd_user_feed, tfidf_svd_feed_user,
@@ -13,10 +13,10 @@ class MMoE(Model):
             feed_user_d2v, user_author_d2v,
             author_user_d2v, first_order_shifts,
             feature_length, num_shared_experts=4, num_tasks=8,
-            experts_shape=[128],
+            experts_shape=[128], task_shape=None,
             **kwargs
     ):
-        super(MMoE, self).__init__(**kwargs)
+        super(CGC, self).__init__(**kwargs)
 
         self.num_tasks = num_tasks
         self.embedding_layer = EmbeddingLayer(
@@ -31,7 +31,8 @@ class MMoE(Model):
         )
 
         self.MTLayer = MultiTask(
-            num_shared_experts=num_shared_experts, num_tasks=num_tasks, experts_shape=experts_shape
+            num_shared_experts=num_shared_experts, num_tasks=num_tasks,
+            experts_shape=experts_shape, task_shape=task_shape
         )
         self.Factorization_Machines = []
         self.MTTowerDense1 = []
